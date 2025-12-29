@@ -29,7 +29,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         let pressure_opt: Option<f64> = row.get("pressure");
         if let Some((date, pressure_val)) = date_opt.zip(pressure_opt) {
             if pressure_val < 100.0 {
-                print!("{} -> ", &date);
                 let date_str = &date[..10];
                 let target_time = &date[11..19];
                 let found = data
@@ -39,8 +38,13 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .find(|(time, _)| {
                         is_same_hour(time, target_time) && is_same_minute(time, target_time)
                     });
-                if let Some((time, pressure)) = found {
-                    println!("{}: {:.4}", time, pressure);
+                if let Some((_time, pressure)) = found {
+                    let new_pressure = pressure;
+                    let target_date = date;
+                    client.execute(
+                        "UPDATE \"Wetterstation\" SET \"Abs. Luftdruck(hpa)\" = $1 WHERE \"Zeit\"::TEXT = $2",
+                        &[&new_pressure, &target_date],
+                    )?;
                 }
             }
         }
