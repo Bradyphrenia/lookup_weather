@@ -63,12 +63,12 @@ fn make_timeline(data: &HashMap<String, f64>, date_str: &str) -> HashMap<String,
 }
 
 fn is_same_hour(t1: &str, t2: &str) -> bool {
-    // Vergleicht nur "HH", ignoriert ":MM:SS"
+    // Compares "HH", ignores ":MM:SS"
     t1.get(0..2) == t2.get(0..2)
 }
 
 fn is_same_minute(t1: &str, t2: &str) -> bool {
-    // Vergleicht "MM", ignoriert ":SS"
+    // Compares "MM", ignores ":SS"
     if (t1.get(3..5) >= t2.get(3..5)) | ((t2.get(3..5) >= Some("57")) && t1.get(3..5) >= Some("54"))
     {
         true
