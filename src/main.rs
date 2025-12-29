@@ -19,10 +19,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let parsed_pressure = pressure_opt.and_then(|p| p.parse::<f64>().ok());
         if let Some((date, pressure)) = date_opt.zip(parsed_pressure) {
             let real_pressure = pressure / 100.0;
-            data.insert(date.clone(), real_pressure);
-            println!("{date}: {real_pressure}");
-        } else {
-            println!("Überspringe Zeile mit NULL-Werten");
+            data.insert(date, real_pressure);
         }
     }
     let query = "SELECT \"Zeit\"::TEXT as time, \"Abs. Luftdruck(hpa)\" as pressure FROM \"Wetterstation\";";
@@ -30,7 +27,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     for row in rows {
         let date_opt: Option<String> = row.get("time");
         let pressure_opt: Option<f64> = row.get("pressure");
-        if let Some((date, pressure)) = date_opt.zip(pressure_opt) {
+        if let Some((date, _pressure)) = date_opt.zip(pressure_opt) {
             if pressure_opt.unwrap() < 100.0 {
                 print!("{} -> ", &date);
                 let date_str = &date[..10];
