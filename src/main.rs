@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         is_same_hour(time, target_time) && is_same_minute(time, target_time)
                     });
                 if let Some((time, pressure)) = found {
-                    println!("{}: {}", time, pressure);
+                    println!("{}: {:.4}", time, pressure);
                 }
             }
         }
