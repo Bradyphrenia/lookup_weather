@@ -27,16 +27,20 @@ fn main() -> Result<(), Box<dyn Error>> {
     for row in rows {
         let date_opt: Option<String> = row.get("time");
         let pressure_opt: Option<f64> = row.get("pressure");
-        if let Some((date, _pressure)) = date_opt.zip(pressure_opt) {
-            if pressure_opt.unwrap() < 100.0 {
+        if let Some((date, pressure_val)) = date_opt.zip(pressure_opt) {
+            if pressure_val < 100.0 {
                 print!("{} -> ", &date);
                 let date_str = &date[..10];
-                let timeline = make_timeline(&data, date_str);
-                for (time, pressure) in timeline {
-                    if is_same_hour(&time, &date[11..19]) && is_same_minute(&time, &date[11..19]) {
-                        println!("{}: {}", time, pressure);
-                        break;
-                    }
+                let target_time = &date[11..19];
+                let found = data
+                    .iter()
+                    .filter(|(d, _)| filter_date(d, date_str))
+                    .map(|(d, p)| (&d[11..19], p))
+                    .find(|(time, _)| {
+                        is_same_hour(time, target_time) && is_same_minute(time, target_time)
+                    });
+                if let Some((time, pressure)) = found {
+                    println!("{}: {}", time, pressure);
                 }
             }
         }
@@ -46,17 +50,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn filter_date(date: &str, date_str: &str) -> bool {
     date.starts_with(date_str)
-}
-
-fn make_timeline(data: &HashMap<String, f64>, date_str: &str) -> HashMap<String, String> {
-    let mut timeline: HashMap<String, String> = HashMap::new();
-    for (date, pressure) in data {
-        if filter_date(date, date_str) {
-            let time = &date[11..19];
-            timeline.insert(time.to_string(), pressure.to_string());
-        }
-    }
-    timeline
 }
 
 fn is_same_hour(t1: &str, t2: &str) -> bool {
