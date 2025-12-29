@@ -24,6 +24,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     let query = "SELECT \"Zeit\"::TEXT as time, \"Abs. Luftdruck(hpa)\" as pressure FROM \"Wetterstation\";";
     let rows = client.query(query, &[])?;
+    let mut transaction = client.transaction()?;
+    let update_stmt = transaction.prepare(
+        "UPDATE \"Wetterstation\" SET \"Abs. Luftdruck(hpa)\" = $1 WHERE \"Zeit\"::TEXT = $2",
+    )?;
     for row in rows {
         let date_opt: Option<String> = row.get("time");
         let pressure_opt: Option<f64> = row.get("pressure");
@@ -39,16 +43,12 @@ fn main() -> Result<(), Box<dyn Error>> {
                         is_same_hour(time, target_time) && is_same_minute(time, target_time)
                     });
                 if let Some((_time, pressure)) = found {
-                    let new_pressure = pressure;
-                    let target_date = date;
-                    client.execute(
-                        "UPDATE \"Wetterstation\" SET \"Abs. Luftdruck(hpa)\" = $1 WHERE \"Zeit\"::TEXT = $2",
-                        &[&new_pressure, &target_date],
-                    )?;
+                    transaction.execute(&update_stmt, &[&pressure, &date])?;
                 }
             }
         }
     }
+    transaction.commit()?;
     Ok(())
 }
 
