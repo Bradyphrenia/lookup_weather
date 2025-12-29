@@ -1,0 +1,9 @@
+[package]
+name = "lookup_weather"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+postgres = "0.19.12"
+
+
