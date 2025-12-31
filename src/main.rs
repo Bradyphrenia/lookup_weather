@@ -25,8 +25,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let query = "SELECT \"Zeit\"::TEXT as time, \"Abs. Luftdruck(hpa)\" as pressure FROM \"Wetterstation\";";
     let rows = client.query(query, &[])?;
 
-
-
     for row in rows {
         let date_opt: Option<String> = row.get("time");
         let pressure_opt: Option<f64> = row.get("pressure");
@@ -42,13 +40,16 @@ fn main() -> Result<(), Box<dyn Error>> {
                         is_same_hour(time, target_time) && is_same_minute(time, target_time)
                     });
                 if let Some((_time, pressure)) = found {
-                    println!("{}: {} -> {:.2}", date, pressure_val, pressure);
-
+                    println!(
+                        "{}: {} -> {}",
+                        date,
+                        pressure_val,
+                        truncate_to_two_decimals(pressure)
+                    );
                 }
             }
         }
     }
-
 
     Ok(())
 }
@@ -70,4 +71,13 @@ fn is_same_minute(t1: &str, t2: &str) -> bool {
     } else {
         false
     }
+}
+
+fn truncate_to_two_decimals(value: &f64) -> f64 {
+    let value_str = format!("{:.3}", value);
+    let dot_idx = value_str.find('.').unwrap_or(value_str.len());
+    let precision = 2;
+    let end_position = (dot_idx + precision + 1).min(value_str.len());
+
+    value_str[..end_position].parse::<f64>().unwrap_or(*value)
 }
