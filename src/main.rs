@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 if let Some((_time, pressure)) = found {
                     let truncated_pressure = truncate_to_two_decimals(pressure);
                     let pressure_val = truncate_to_two_decimals(&pressure_val);
-                    let pressure_diff = truncated_pressure - pressure_val;
+                    let pressure_diff = &truncated_pressure - &pressure_val;
                     println!(
                         "{}: {} -> {} : {}",
                         date, pressure_val, truncated_pressure, pressure_diff
