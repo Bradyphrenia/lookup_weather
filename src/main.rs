@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let date_opt: Option<String> = row.get("time");
         let pressure_opt: Option<f64> = row.get("pressure");
         if let Some((date, pressure_val)) = date_opt.zip(pressure_opt) {
-            if pressure_val < &threshold {
+            if pressure_val < *&threshold {
                 let date_str = &date[..10];
                 let target_time = &date[11..19];
                 let found = data
