@@ -10,8 +10,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
     let mut data: HashMap<String, f64> = HashMap::new();
     let mut client = Client::connect(&connection_string, NoTls)?;
-    let query =
-        "SELECT \"Time\"::TEXT as time, \"BME280_pressure\" as pressure FROM \"Feinstaubsensor_2\";";
+    let query = "SELECT \"Time\"::TEXT as time, \"BME280_pressure\" as pressure FROM \"Feinstaubsensor_2\";";
     let rows = client.query(query, &[])?;
     for row in rows {
         let date_opt: Option<String> = row.get("time");
@@ -29,7 +28,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let date_opt: Option<String> = row.get("time");
         let pressure_opt: Option<f64> = row.get("pressure");
         if let Some((date, pressure_val)) = date_opt.zip(pressure_opt) {
-            if pressure_val < threshold {
+            if pressure_val < &threshold {
                 let date_str = &date[..10];
                 let target_time = &date[11..19];
                 let found = data
@@ -79,6 +78,5 @@ fn truncate_to_two_decimals(value: &f64) -> f64 {
     let dot_idx = value_str.find('.').unwrap_or(value_str.len());
     let precision = 2;
     let end_position = (dot_idx + precision + 1).min(value_str.len());
-
     value_str[..end_position].parse::<f64>().unwrap_or(*value)
 }
