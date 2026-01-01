@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
     let mut data: HashMap<String, f64> = HashMap::new();
     let mut client = Client::connect(&connection_string, NoTls)?;
-    let query = "SELECT \"Time\"::TEXT as time, \"BME280_pressure\" as pressure FROM \"Feinstaubsensor_2\";";
+    let query = "SELECT \"Time\"::TEXT as time, \"BME280_pressure\" as pressure FROM \"Feinstaubsensor_2\" ORDER BY \"Time\";";
     let rows = client.query(query, &[])?;
     for row in rows {
         let date_opt: Option<String> = row.get("time");
