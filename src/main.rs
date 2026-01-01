@@ -22,14 +22,14 @@ fn main() -> Result<(), Box<dyn Error>> {
             data.insert(date, real_pressure);
         }
     }
-    let query = "SELECT \"Zeit\"::TEXT as time, \"Abs. Luftdruck(hpa)\" as pressure FROM \"Wetterstation\";";
+    let query = "SELECT \"Zeit\"::TEXT as time, \"Abs. Luftdruck(hpa)\" as pressure FROM \"Wetterstation\" ORDER BY \"Zeit\";";
     let rows = client.query(query, &[])?;
-
+    let threshold = 10000.0;
     for row in rows {
         let date_opt: Option<String> = row.get("time");
         let pressure_opt: Option<f64> = row.get("pressure");
         if let Some((date, pressure_val)) = date_opt.zip(pressure_opt) {
-            if pressure_val < 100.0 {
+            if pressure_val < threshold {
                 let date_str = &date[..10];
                 let target_time = &date[11..19];
                 let found = data
@@ -40,11 +40,12 @@ fn main() -> Result<(), Box<dyn Error>> {
                         is_same_hour(time, target_time) && is_same_minute(time, target_time)
                     });
                 if let Some((_time, pressure)) = found {
+                    let truncated_pressure = truncate_to_two_decimals(pressure);
+                    let pressure_val = truncate_to_two_decimals(&pressure_val);
+                    let pressure_diff = truncated_pressure - pressure_val;
                     println!(
-                        "{}: {} -> {}",
-                        date,
-                        pressure_val,
-                        truncate_to_two_decimals(pressure)
+                        "{}: {} -> {} : {}",
+                        date, pressure_val, truncated_pressure, pressure_diff
                     );
                 }
             }
